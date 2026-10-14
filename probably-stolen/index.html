@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Probably Stolen tools</title>
+        <link rel="stylesheet" href="style.css">
+        <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>    
+    </head>
+    <body>
+        <div class="tabber">
+            <button class="tablink" onclick="showTab(this, 'WaterMixer')">Water mixer</button>
+            <button class="tablink" onclick="showTab(this, 'WaterPurifier')">Water purifier calculator</button>
+            <button class="tablink" onclick="showTab(this, 'WineCalc')">Wine calculator</button>
+            <button class="tablink" onclick="showTab(this, 'Appraiser')">Appraiser</button>
+            <button class="tablink" onclick="showTab(this, 'Credits')">Credits</button>
+
+            <div id="WaterMixer" class="tabcontent">
+                <h3>Water mixer</h3>
+
+                <div style="display: grid; grid-template-columns: 60% 40%;">
+                    <div>
+                        <input id="waterMixer-amount" type="number" oninput="waterDilutionInputChange()"/>
+                        <label for="waterMixer-amount">Amount of water (ml)</label>
+
+                        <br>
+                        
+                        <input id="waterMixer-purity" type="number" step=".01" min="0" max="100" oninput="waterDilutionInputChange()"/>
+                        <label for="waterMixer-purity">Water purity (%)</label>
+
+                        <br>
+                        
+                        <input id="waterMixer-mixer" type="number" step=".01" min="0" max="100" oninput="waterDilutionInputChange()"/>
+                        <label for="waterMixer-mixer">Mixer purity (%)</label>
+
+                        <br>
+                        
+                        <input id="waterMixer-target" type="number" step=".01" min="0" max="100" oninput="waterDilutionInputChange()"/>
+                        <label for="waterMixer-target">Target quality (optional)</label>
+
+                        <br><br><br>
+
+                        <div id="waterMixer-answer">
+
+                        </div>
+                    </div>
+                    <div class="calculator-info">
+                        <table class="waterPurityInfo"></table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="WaterPurifier" class="tabcontent">
+                <h3>Water purity calculator</h3>
+
+                <div style="display: grid; grid-template-columns: 60% 40%;">
+                    <div>
+                        <input id="waterPurifier-performance"/>
+                        <label for="waterPurifier-water">Performance</label>
+
+                        <input id="waterPurifier-quality"/>
+                        <label for="waterPurifier-water">Quality</label>
+
+                        <br>
+                        
+                        <input id="waterPurifier-volume"/>
+                        <label for="waterPurifier-volume">Volume (ml)</label>
+
+                        <br><br>
+
+                        <span>
+                            Enter volume shown in AquaScan, with the unit (e.g. "681.15 ml").
+                            <br>
+                            If it's measured in liters, enter the percentage instead (e.g. "92.72%").
+                        </span>
+
+                        <br>
+
+                        <div style="display: grid; grid-template-columns: 40% 40%;">
+                            <div id="waterPurifier-purity">
+                                <input id="waterPurifier-water" data-item="water"/>
+                                <label for="waterPurifier-water">Water</label>
+
+                                <br>
+                                
+                                <input id="waterPurifier-heavyMetal" data-item="heavyMetal"/>
+                                <label for="waterPurifier-heavyMetal">Heavy Metal</label>
+
+                                <br>
+                                
+                                <input id="waterPurifier-organicWaste" data-item="organicWaste"/>
+                                <label for="waterPurifier-organicWaste">Organic Waste</label>
+
+                                <br>
+                                
+                                <input id="waterPurifier-microbes" data-item="microbes"/>
+                                <label for="waterPurifier-microbes">Microbes</label>
+
+                                <br>
+                                
+                                <input id="waterPurifier-chemicals" data-item="chemicals"/>
+                                <label for="waterPurifier-chemicals">Chemical Contaminant</label>
+
+                                <br>
+                                
+                                <input id="waterPurifier-physical" data-item="physical"/>
+                                <label for="waterPurifier-physical">Physical Contaminant</label>
+
+                                <br>
+                                
+                                <input id="waterPurifier-mineral" data-item="mineral"/>
+                                <label for="waterPurifier-mineral">Mineral</label>
+                            </div>
+                            <div id="waterPurifier-paste">
+                                Or paste a scan screenshot here; only paste the part with the contaminants.
+                                <br>
+                                <button onclick="showHideNextSibling(this)">Example</button>
+                                <div style="display:none;" >
+                                    <img src="images/Purifier-scan-example.png">
+                                </div>
+                                <br>
+                                <span id="waterPurifier-paste-status"></span>
+                                <div id="waterPurifier-paste-area" style="min-height: 200px; border: 2px dashed #ccc;">
+                                    <img id="waterPurifier-paste-img">
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <button onclick="calculatePurifier()">Calculate</button>
+
+                        <br><br><br>
+
+                        <table id="waterPurity-result">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Removed</th>
+                                    <th>Purity</th>
+                                    <th>Status</th>
+                                    <th>HvMtl</th>
+                                    <th>OrgWst</th>
+                                    <th>Micr</th>
+                                    <th>Chem</th>
+                                    <th>Phys</th>
+                                    <th>Mnrl</th>
+                                    <th>Filtered</th>
+                                    <th>Filtered (UV)</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="calculator-info">
+                        <table class="waterPurityInfo"></table>
+                        All displayed values are in ul.
+                        <br>
+                        Quality breakpoints are 50, 75, 100, and 200.
+                        <br>
+                        Actual values may differ slightly due to rounding, percentage inaccuracy, and a game bug with minimum concentrations.
+                        <br>
+                        If you paste a screenshot and get strange values, check that the decimal point is placed correctly and that "L" is "L" and not "I" - OCR sometimes has issues with those.
+                    </div>
+                </div>
+            </div>
+
+            <div id="WineCalc" class="tabcontent">
+                <h3>Wine calculator</h3>
+
+                <div style="display: grid; grid-template-columns: 60% 40%;">
+                    <div>
+                        <input id="wine-hardmode" type="checkbox">
+                        <label for="wine-hardmode">Hard Mode</label>
+                        <br>
+                        <input id="wine-bioreactor" type="checkbox">
+                        <label for="wine-bioreactor">Yeast Bioreactor</label>
+                        <br>
+                        <input id="wine-age" type="number"/>
+                        <label for="wine-age">Age days</label>
+                        <br>
+                        <input id="wine-money" type="number"/>
+                        <label for="wine-money">Your money</label>
+
+                        <table id="wine-item-table">
+                            <caption>Items</caption>
+                            <thead>
+                                <tr>
+                                    <td></td>
+                                    <td>Small grapes</td>
+                                    <td>Normal grapes</td>
+                                    <td>Bad grapes</td>
+                                    <td>Moldy grapes</td>
+                                    <td>Bottles</td>
+                                    <td>Yeast</td>
+                                    <td>Basewater</td>
+                                    <td>HQ water</td>
+                                </tr>
+                            </thead>
+                            <tr>
+                                <th>Trader</th>
+                                <td><input type="number" min="0" data-side="trader" data-item="smallBerry"/></td>
+                                <td><input type="number" min="0" data-side="trader" data-item="normalBerry"/></td>
+                                <td><input type="number" min="0" data-side="trader" data-item="badBerry"/></td>
+                                <td><input type="number" min="0" data-side="trader" data-item="moldyBerry"/></td>
+                                <td><input type="number" min="0" data-side="trader" data-item="bottle"/></td>
+                                <td><input type="number" min="0" data-side="trader" data-item="yeast"/></td>
+                                <td><input type="number" min="0" data-side="trader" data-item="basewater"/></td>
+                                <td><input type="number" min="0" data-side="trader" data-item="HQwater"/></td>
+                            </tr>
+                            <tr>
+                                <th>Inventory</th>
+                                <td><input type="number" min="0" data-side="player" data-item="smallBerry"/></td>
+                                <td><input type="number" min="0" data-side="player" data-item="normalBerry"/></td>
+                                <td><input type="number" min="0" data-side="player" data-item="badBerry"/></td>
+                                <td><input type="number" min="0" data-side="player" data-item="moldyBerry"/></td>
+                                <td><input type="number" min="0" data-side="player" data-item="bottle"/></td>
+                                <td><input type="number" min="0" data-side="player" data-item="yeast"/></td>
+                                <td><input type="number" min="0" data-side="player" data-item="basewater"/></td>
+                                <td><input type="number" min="0" data-side="player" data-item="HQwater"/></td>
+                            </tr>
+                        </table>
+
+                        <table id="wine-price-table">
+                            <caption>Price events</caption>
+                            <thead>
+                                <tr>
+                                    <td>Food</td>
+                                    <td>Water</td>
+                                    <td>Household goods</td>
+                                </tr>
+                            </thead>
+                            <tr>
+                                <td><input type="number" data-item="food"/></td>
+                                <td><input type="number" data-item="water"/></td>
+                                <td><input type="number" data-item="household"/></td>
+                            </tr>
+                        </table>
+
+                        <button onclick="calculateWine()">Calculate!</button>
+
+                        <div id="wine-result"></div>
+                    </div>
+
+                    <div class="calculator-info">
+                        The calculator tells you the maximum value you can get from these items right now. You may wish to save good berries for later.
+                        <br>
+                        "Trader" here refers to the retired winemaker, which has a 15% markup. If you have a seller without markup, add their items to Inventory instead.
+                        <br>
+                        "Bad grapes" are overripe (shriveled) and underripe (orange, 2 types).
+                        <br>
+                        For water, mark how many 750ml portions you have in total.
+                        <br>
+                        The calculator ignores +2 brewing days from not adding yeast.
+                        <br>
+                        Empty inputs will be treated as 0. (Except money, which will be treated as unlimited.)
+                        <br><br>
+                        Wine qualities are:
+                        <br>
+                        Master Vintage (6): 175 + 5.25/day
+                        <br>
+                        Reserve (5): 150 + 4.5/day
+                        <br>
+                        Production Wine (3-4): 125 + 3.75/day
+                        <br>
+                        Homebrew (2): 100 + 3/day
+                        <br>
+                        Bucket Brew (1): 85 + 2.55/day
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="Appraiser" class="tabcontent">
+                <h3>Appraiser</h3>
+
+                <div class="tabber">
+                    <button class="tablink" onclick="showTab(this, 'CyberHand')">Cybernetic Hand</button>
+                    <button class="tablink" onclick="showTab(this, 'PlasmaCart')">Plasma Cartridge</button>
+                    <button class="tablink" onclick="showTab(this, 'Ribwich')">Ribwich</button>
+
+                    <div id="CyberHand" class="tabcontent"></div>
+                    <div id="PlasmaCart" class="tabcontent"></div>
+                    <div id="Ribwich" class="tabcontent"></div>
+                </div>
+
+            </div>
+
+            <div id="Credits" class="tabcontent">
+                Website and all code by Kelenius, released under <a href="https://opensource.org/license/mit">MIT license</a>, 2026.
+                <br>
+                If you have any issues, reach out to me on Discord.
+                <br>
+                Many thanks for the members of the Discord community, particularly Maslak, without whom many of those would take much longer to make.
+                <br>
+                All images sourced from Probably Stolen, used under Fair Use.
+            </div>
+        </div>
+
+        <script src="tools.js"></script>
+    </body>
+</html>
