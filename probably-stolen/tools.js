@@ -637,7 +637,7 @@ class Appraiser {
     }
 
     lines.push(`----------------`);
-    lines.push(`TOTAL: ${ret}`);
+    lines.push(`TOTAL: <b>${ret}</b>`);
     
     this.logElement.innerHTML = lines.join("<br>");
   }
@@ -652,7 +652,8 @@ class Appraiser {
     element.appendChild(h3);
 
     const containerDiv = document.createElement("div");
-    containerDiv.classList.add("container");
+    containerDiv.style.display = "grid";
+    containerDiv.style.gridTemplateColumns = "60% 40%";
     element.appendChild(containerDiv);
 
     const leftDiv = document.createElement("div");
@@ -678,8 +679,10 @@ class Appraiser {
     }
 
     this.inputContainer.addEventListener("click", (event) => {
-      if (event.target.dataset.row) {
-        this.selectOption(event.target.dataset.row, event.target.dataset.col);
+      let target = event.target;
+      if (target.tagName == "IMG") target = target.parentElement;
+      if (target.dataset.row) {
+        this.selectOption(target.dataset.row, target.dataset.col);
       }
       this.updateValue();
     })
@@ -765,12 +768,12 @@ class RibwichAppraiser extends Appraiser {
     new AppraiseCategoryPicker("Packaging", ["OK", "Torn/missing"], [0, -Infinity]),
     new AppraiseCategoryInput("Production date", (n) => {
       const parsed = n.match(/(\d{1,2})\/(\d{3})/);
-      if (!parsed) return { name: "COUNTERFEIT: wrong production date", value: -Infinity, counterfeit: true };
+      if (!parsed) return { name: "Wrong production date?", value: -Infinity, counterfeit: true };
       const month = parseInt(parsed[1]); const year = parseInt(parsed[2]);
       if (isNaN(month) || isNaN(year)
         || month < 1 || month > 12
         || year < 425 || (year > 429 && year < 432) || year > 438) {
-          return { name: "COUNTERFEIT: wrong production date", value: -Infinity, counterfeit: true };
+          return { name: "Production date must be 425-429 or 432-438", value: -Infinity, counterfeit: true };
         }
         if (year == 425 && month == 1) return { name: "First run + first month", value: 130, ribLogo: false };
         if (year == 438 && month == 12) return { name: "Last month", value: 50, ribLogo: true };
@@ -782,10 +785,10 @@ class RibwichAppraiser extends Appraiser {
     new AppraiseCategoryPicker("Ribwich logo", ["Correct", "Absent", "Incorrect"], [0, 0, -Infinity]),
     new AppraiseCategoryInput("Packing facility", (n) => {
       const fac = parseInt(n);
-      if (isNaN(fac)) return { name: "COUNTERFEIT: no packing facility", value: -Infinity, counterfeit: true }
+      if (isNaN(fac)) return { name: "No packing facility?", value: -Infinity, counterfeit: true }
       if ([1, 2, 5, 8, 21, 34].includes(fac)) return { name: "HQ packing facility", value: 50 };
       if ([5, 17, 18, 26, 31].includes(fac)) return { name: "LQ packing facility", value: -50 };
-      if (fac > 35) return { name: "COUNTERFEIT: packing facility >35", value: -Infinity, counterfeit: true }
+      if (fac > 35 || fac < 1) return { name: "Packing facility not from 1-35", value: -Infinity, counterfeit: true }
       return { name: "", value: 0 };
     }),
     new AppraiseCategoryPicker("Sesame bun and extra pickles", ["Neither", "One", "Both"], [0, -Infinity, 300]),
@@ -800,17 +803,36 @@ class RibwichAppraiser extends Appraiser {
   ];
 
   static specialValue(item) {
-    if (item[0] == 1
-      || item[1] !== undefined && this.categories[1].getValue(item[1]) == -Infinity
-      || item[2] == 1
-      || item[3] == 2
-      || item[5] == 1
-      || (item[1] !== undefined && item[3] !== undefined && (
-        this.categories[1].valueFunc(item[1]).ribLogo && item[3] == 1
-        || !this.categories[1].valueFunc(item[1]).ribLogo && item[3] == 0
-      ))
-    ) {
-      this.logElement.innerHTML = "COUNTERFEIT<br>Base price: 40";
+    const reasons = [];
+    if (item[0] == 1) {
+      reasons.push("Package torn/missing");
+    }
+    if (item[2] == 1) {
+      reasons.push("Incorrect/missing Davre logo");
+    }
+    if (item[3] == 2) {
+      reasons.push("Incorrect Ribwich logo");
+    }
+    if (item[5] == 1) {
+      reasons.push("Counterfeit deluxe edition");
+    }
+    if (item[1] !== undefined) {
+      const v = this.categories[1].valueFunc(item[1]);
+      if (v.counterfeit) reasons.push(v.name);
+      if (item[3] !== undefined) {
+        if (v.ribLogo && item[3] == 1) {
+          reasons.push("2nd run must have Ribwich logo");
+        } else if (!v.ribLogo && item[3] == 0) {
+          reasons.push("1st run must NOT have Ribwich logo");
+        }
+      }
+    }
+    if (item[4] !== undefined) {
+      const v = this.categories[4].valueFunc(item[4]);
+      if (v.counterfeit) reasons.push(v.name);
+    }
+    if (reasons.length) {
+      this.logElement.innerHTML = `COUNTERFEIT<br>${reasons.join("<br>")}<br>BASE VALUE: <b>${this.minValue}</b>`;
       return 40;
     }
   }
