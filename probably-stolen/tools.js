@@ -739,6 +739,9 @@ class PlasmaCartAppraiser extends Appraiser {
   ];
 
   static imageList = [
+    { row: 0, col: 0, img: "PlasmaCart-NoWear.png" },
+    { row: 0, col: 1, img: "PlasmaCart-LightWear.png" },
+    { row: 0, col: 2, img: "PlasmaCart-HeavyWear.png" },
     { row: 5, col: 1, img: "PlasmaCart-WLD.png" },
     { row: 5, col: 2, img: "PlasmaCart-ZHS.png" },
     { row: 5, col: 3, img: "PlasmaCart-RNR.png" },
