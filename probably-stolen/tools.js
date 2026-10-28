@@ -726,15 +726,15 @@ class CyberHandAppraiser extends Appraiser {
 
 class PlasmaCartAppraiser extends Appraiser {
   static name = "Plasma Cartridge";
-  static baseValue = 100;
-  static minValue = 30;
+  static baseValue = 300;
+  static minValue = 90;
 
   static categories = [
-    new AppraiseCategoryPicker("Condition", ["Standard", "Light Wear", "Heavy Wear"], [0, -15, -30]),
-    new AppraiseCategoryYesNo("Cracked", 0, -50),
-    new AppraiseCategoryYesNo("Exposed Screws", 0, -10),
-    new AppraiseCategoryYesNo("Reinforced", 0, 20),
-    new AppraiseCategoryPicker("Color", ["Standard", "Low-Grade", "High-Grade"], [0, -50, 50]),
+    new AppraiseCategoryPicker("Condition", ["Standard", "Light Wear", "Heavy Wear"], [0, -45, -90]),
+    new AppraiseCategoryYesNo("Cracked", 0, -150),
+    new AppraiseCategoryYesNo("Exposed Screws", 0, -30),
+    new AppraiseCategoryYesNo("Reinforced", 0, 60),
+    new AppraiseCategoryPicker("Color", ["Standard", "Low-Grade", "High-Grade"], [0, -150, 150]),
     new AppraiseCategoryPicker("Seal", ["None", "WLD", "ZHS", "RNR", "IGN"], [0, 0, 0, 0, 0]),
   ];
 
@@ -750,13 +750,13 @@ class PlasmaCartAppraiser extends Appraiser {
 
   static extraValue(item) {
     if (item[5] == 1) {
-      if (item[4] == 0 || item[4] == 1) return 20;
+      if (item[4] == 0 || item[4] == 1) return 60; // WLD
     } else if (item[5] == 2) {
-      if (item[0] == 0 && item[1] == 0 && item[2] == 0 && item[4] == 0) return 40;
+      if (item[0] == 0 && item[1] == 0 && item[2] == 0 && item[4] == 0) return 120; // ZHS
     } else if (item[5] == 3) {
-      if (item[1] == 0 && item[4] == 0) return 40;
+      if (item[1] == 0 && item[4] == 0) return 120; // RNR
     } else if (item[5] == 4) {
-      if (item[0] == 0 && item[1] == 0 && item[2] == 0 && item[3] == 0 && item[4] == 2) return 80;
+      if (item[0] == 0 && item[1] == 0 && item[2] == 0 && item[3] == 0 && item[4] == 2) return 750; // IGN
     }
     return 0;
   }
