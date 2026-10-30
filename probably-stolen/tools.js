@@ -790,7 +790,7 @@ class RibwichAppraiser extends Appraiser {
       const fac = parseInt(n);
       if (isNaN(fac)) return { name: "No packing facility?", value: -Infinity, counterfeit: true }
       if ([1, 2, 5, 8, 21, 34].includes(fac)) return { name: "HQ packing facility", value: 50 };
-      if ([5, 17, 18, 26, 31].includes(fac)) return { name: "LQ packing facility", value: -50 };
+      if ([7, 15, 18, 26, 31].includes(fac)) return { name: "LQ packing facility", value: -50 };
       if (fac > 35 || fac < 1) return { name: "Packing facility not from 1-35", value: -Infinity, counterfeit: true }
       return { name: "", value: 0 };
     }),
